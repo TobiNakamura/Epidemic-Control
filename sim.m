@@ -7,9 +7,9 @@ number = [0.99,0.001,0]; %column wise: S, I, R
 desired=0.04; %value of I control system will shoot for
 simTime = 400;
 lengthT = simTime/ctrlT; %length of control period
-error=[0]; %error computed once every control period
-beta = [binit]; %beta computed once every control period
-delay=0.3*ctrlT; %delay between infection and control units of lengthT, factor is in units of simTime
+error=[0 0]; %error computed once every control period
+beta = [binit binit]; %beta computed once every control period
+delay=0.1*ctrlT; %delay between infection and control units of lengthT, factor is in units of simTime
 for k=1:ctrlT
   %numerically solve ode within control period (ctrlT)
   %initial condition for new section is end of last section
@@ -21,9 +21,8 @@ for k=1:ctrlT
    %crude digital PID - controlling number of infected
     %number(end-1,2): delay from plant action to control of one lengthT, simulate test delay
     error = [error, desired - number(end-delay,2)];
-    integral = error(end)*lengthT;
-    diff =(error(end)-error(end-1))/lengthT;
-    betactrl = Kall(1)*error(end)+Kall(2)*integral+Kall(3)*diff;
+    betactrl = PID(error, beta-beta(1),  [Kall lengthT]);
+    %betactrl = IIR(error, beta-beta(1), -1);
     beta = [beta beta(1)+betactrl]; %bias beta around the natural infectivity
     
     %floor and ceiling on beta
@@ -43,13 +42,13 @@ subplot(2, 1, 1)
 hold on
 plot(time, number(:,1))
 ax=plotyy(time, number(:,3), time,  number(:,2));
+hold off
 xlabel ("time");
 ylabel (ax(1), "S, R");
 ylabel (ax(2), "Infected");
 legend('S', 'R', 'I')
 str = sprintf("initial infection rate = %d,  recovery rate = 0.05",beta(1)); 
 title(str)
-hold off
 subplot(2, 1, 2)
 plot([ones(delay,1)*beta(1) zeros(delay,1) ; beta' error'])
 axis([0 ctrlT -beta(1) beta(1)])

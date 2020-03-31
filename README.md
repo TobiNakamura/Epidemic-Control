@@ -12,3 +12,7 @@ Small control periods, i.e., real time control, gives good results.
 Large control periods, i.e., delay from infection, testing, to action produces poor results.
 
 ![large control periods](delay.png)
+
+Delay from infection to control applied does not affect the performance unless this delay is excessivly large. e.g., see below delay of 120 units
+
+![large delay](delay120.png)

@@ -5,19 +5,22 @@ function sim (binit, Kall, ctrlT)
 time = [0]; %time units series
 number = [0.99,0.001,0]; %column wise: S, I, R
 desired=0.04; %value of I control system will shoot for
-lengthT = 400/ctrlT; %length of control period
+simTime = 400;
+lengthT = simTime/ctrlT; %length of control period
 error=[0]; %error computed once every control period
 beta = [binit]; %beta computed once every control period
+delay=0.3*ctrlT; %delay between infection and control units of lengthT, factor is in units of simTime
 for k=1:ctrlT
   %numerically solve ode within control period (ctrlT)
   %initial condition for new section is end of last section
   [t,x]=SIR(lengthT,beta(end),number(end,:));
   time = [time t+time(end)]; %append to rest of data
   number = [number; x];
-  
+
+  if k>delay
    %crude digital PID - controlling number of infected
     %number(end-1,2): delay from plant action to control of one lengthT, simulate test delay
-    error = [error, desired - number(end-1,2)];
+    error = [error, desired - number(end-delay,2)];
     integral = error(end)*lengthT;
     diff =(error(end)-error(end-1))/lengthT;
     betactrl = Kall(1)*error(end)+Kall(2)*integral+Kall(3)*diff;
@@ -32,6 +35,7 @@ for k=1:ctrlT
     if(beta(end)>beta(1))
       beta(end)=beta(1);
     endif
+  endif
 endfor
 
 %plotting results
@@ -47,7 +51,8 @@ str = sprintf("initial infection rate = %d,  recovery rate = 0.05",beta(1));
 title(str)
 hold off
 subplot(2, 1, 2)
-plot([beta' error'])
+plot([ones(delay,1)*beta(1) zeros(delay,1) ; beta' error'])
+axis([0 ctrlT -beta(1) beta(1)])
 legend('beta','error')
 str=sprintf("Kp = %d, Ki = %d, Kd = %d, # control period = %d",Kall(1),Kall(2),Kall(3),ctrlT);
 title(str)

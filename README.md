@@ -1,3 +1,10 @@
+#Stochastic Modelling
+See pdf for model details. A completed simulation is shown with 30 runs. Dashed yellow line is the mean of all curves.
+![Completed Stochastic model](stoch-runs.png)
+
+Simulation is deemed complete when the sum of squares error of the mean curves before and after the addition of another run apporaches a sufficiently small number. In the plot below the blue trace is the run to run sse and the dashed trace is a moving average.
+![SSE over runs](sse.png)
+
 # Epidemic-Control
 A control systems approach to epidemic control. 
 
